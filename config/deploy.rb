@@ -49,16 +49,32 @@ set :puma_workers, 0
 set :puma_init_active_record, true
 set :puma_preload_app, true
 
+
+set :unicorn_config, "#{current_path}/config/unicorn.rb"
+set :unicorn_pid, "/home/deploy/pids/unicorn.pid"
 namespace :deploy do
 
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
+  task :start, :roles => :app, :except => { :no_release => true } do
+    run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+  end
+
+  task :stop, :roles => :app, :except => { :no_release => true } do
+    run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  end
+
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    # 用USR2信号来实现无缝部署重启
+    run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
+  end
+
+  # after :restart, :clear_cache do
+  #   on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       # within release_path do
       #   execute :rake, 'cache:clear'
       # end
-    end
-  end
+    # end
+  # end
 
 end
 
