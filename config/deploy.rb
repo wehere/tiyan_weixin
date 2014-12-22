@@ -55,30 +55,25 @@ set :unicorn_pid, "/home/deploy/pids/unicorn.pid"
 namespace :deploy do
 
   task :stop do
-    on roles(:web) do
       run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
-    end
   end
 
   task :start do
-    on roles(:web) do
       run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
-    end
   end
   #
   # task :stop, :roles => :app, :except => { :no_release => true } do
   #   run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
   # end
 
-  # task :restart do
-  #   on roles(:web) do
-  #
-  #     run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
-  #     run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
-  #   end
+  task :restart do
+    # on roles(:web) do
+
+      run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+      run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
     # 用USR2信号来实现无缝部署重启
     # run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
-  # end
+  end
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
