@@ -54,8 +54,10 @@ set :unicorn_config, "#{current_path}/config/unicorn.rb"
 set :unicorn_pid, "/home/deploy/pids/unicorn.pid"
 namespace :deploy do
 
-  task :start, :roles => :app do
-    run 'df -h'
+  task :start do
+    on roles(:app) do
+      run 'df -h'
+    end
     # run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
   end
   #
