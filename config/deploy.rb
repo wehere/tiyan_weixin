@@ -62,10 +62,10 @@ namespace :deploy do
     run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
   end
 
-  task :restart, :roles => :app, :except => { :no_release => true } do
-    # 用USR2信号来实现无缝部署重启
-    run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
-  end
+  # task :restart, :roles => :app, :except => { :no_release => true } do
+  #   # 用USR2信号来实现无缝部署重启
+  #   run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
+  # end
 
   # after :restart, :clear_cache do
   #   on roles(:web), in: :groups, limit: 3, wait: 10 do
