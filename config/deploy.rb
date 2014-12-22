@@ -66,7 +66,7 @@ namespace :deploy do
   #   run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
   # end
 
-  task :restart do
+  task :me do
     # on roles(:web) do
 
       run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
@@ -75,7 +75,7 @@ namespace :deploy do
     # run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
   end
 
-  after :restart do
+  after :restart,:me do
       run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
       run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
       # Here we can do anything such as:
