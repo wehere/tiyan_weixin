@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get 'weixins/show'
+
+  get 'weixins/create'
+
   get 'static_pages/welcome'
   root 'static_pages#welcome'
   # The priority is based upon order of creation: first created -> highest priority.
