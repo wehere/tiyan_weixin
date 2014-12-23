@@ -55,11 +55,15 @@ set :unicorn_pid, "/home/deploy/pids/unicorn.pid"
 namespace :deploy do
 
   task :stop do
+    on roles(:all) do
       run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+    end
   end
 
   task :start do
+    on roles(:all) do
       run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+    end
   end
   #
   # task :stop, :roles => :app, :except => { :no_release => true } do
@@ -76,8 +80,10 @@ namespace :deploy do
   end
 
   after :restart,:me do
+    on roles(:all) do
       run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
       run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+    end
       # Here we can do anything such as:
       # within release_path do
       #   execute :rake, 'cache:clear'
