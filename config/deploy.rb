@@ -54,42 +54,85 @@ set :unicorn_config, "#{current_path}/config/unicorn.rb"
 set :unicorn_pid, "/home/deploy/pids/unicorn.pid"
 namespace :deploy do
 
-  task :stop do
-    on roles(:all) do
-      run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
-    end
-  end
+  after :finishing, 'deploy:cleanup'
+  after :finishing, 'unicorn:reload'
 
-  task :start do
-    on roles(:all) do
-      run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
-    end
-  end
-  #
-  # task :stop, :roles => :app, :except => { :no_release => true } do
-  #   run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  # task :stop do
+  #   on roles(:all) do
+  #     run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  #   end
   # end
+  #
+  # task :start do
+  #   on roles(:all) do
+  #     run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+  #   end
+  # end
+  # #
+  # # task :stop, :roles => :app, :except => { :no_release => true } do
+  # #   run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  # # end
 
-  task :me do
-    # on roles(:web) do
-
-      run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
-      run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
-    # 用USR2信号来实现无缝部署重启
-    # run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
-  end
-
-  after :restart,:me do
-    on roles(:all) do
-      run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
-      run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
-    end
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
-  end
+  # task :me do
+  #   # on roles(:web) do
+  #
+  #     run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  #     run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+  #   # 用USR2信号来实现无缝部署重启
+  #   # run "if [ -f #{unicorn_pid} ]; then kill -s USR2 `cat #{unicorn_pid}`; fi"
+  # end
+  #
+  # after :restart,:me do
+  #   on roles(:all) do
+  #     run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+  #     run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+  #   end
+  #     # Here we can do anything such as:
+  #     # within release_path do
+  #     #   execute :rake, 'cache:clear'
+  #     # end
+  # end
 
 end
 
+namespace :unicorn do
+  desc 'Stop Unicorn'
+  task :stop do
+    on roles(:app) do
+      # if test("[ -f #{fetch(:unicorn_pid)} ]")
+        # execute :kill, capture(:cat, fetch(:unicorn_pid))
+      #   execute "kill -quit #{}"
+      # end
+      run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+    end
+  end
+
+  desc 'Start Unicorn'
+  task :start do
+    on roles(:app) do
+      # within current_path do
+      #   with rails_env: fetch(:rails_env) do
+      #     execute :bundle, "exec unicorn -c #{fetch(:unicorn_config)} -D"
+      #   end
+      # end
+      run "cd #{current_path} && RAILS_ENV=production bundle exec unicorn_rails -c #{unicorn_config} -D -p 3000"
+    end
+  end
+
+  # desc 'Reload Unicorn without killing master process'
+  # task :reload do
+  #   on roles(:app) do
+  #     if test("[ -f #{fetch(:unicorn_pid)} ]")
+  #       execute :kill, '-s USR2', capture(:cat, fetch(:unicorn_pid))
+  #     else
+  #       error 'Unicorn process not running'
+  #     end
+  #   end
+  # end
+
+  desc 'Restart Unicorn'
+  task :restart
+  before :restart, :stop
+  before :restart, :start
+end
 
