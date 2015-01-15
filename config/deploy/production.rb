@@ -28,9 +28,11 @@ role :db,  %w{deploy@120.24.219.107}
 # Global options
 # --------------
 set :ssh_options, {
-   keys: %w(/Users/beslow/.ssh/id_rsa),
-   forward_agent: true,
-   auth_methods: %w(publickey)
+   user: "deploy",
+   keys: 'jiaren',
+   forward_agent: false,
+   auth_methods: %w(password),
+   password: 'jiaren'
 }
 #
 # And/or per server (overrides global)
@@ -41,4 +43,11 @@ set :ssh_options, {
 #   ssh_options: {
 #     user: 'deploy', # overrides user setting above
 #     auth_methods: %w(publickey password),
+#   }
+#   ssh_options: {
+#     user: 'user_name', # overrides user setting above
+#     keys: %w(/home/user_name/.ssh/id_rsa),
+#     forward_agent: false,
+#     auth_methods: %w(publickey password)
+#     # password: 'please use keys'
 #   }
